@@ -1,12 +1,11 @@
 package com.avdhoot.springboot.service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.avdhoot.springboot.entity.User;
 import com.avdhoot.springboot.entity.UserPersonal;
@@ -14,8 +13,6 @@ import com.avdhoot.springboot.model.CustomUserPersonal;
 import com.avdhoot.springboot.model.RequestModel;
 import com.avdhoot.springboot.model.ResponseModel;
 import com.avdhoot.springboot.repository.UserRepository;
-
-import jakarta.transaction.Transactional;
 
 @Service
 public class UserService {
@@ -75,32 +72,22 @@ public class UserService {
 
 		return new ResponseModel(true, "User deleted successfully");
 	}
-	
+
+	@Transactional
 	public ResponseModel updateUserById(int id, RequestModel model) {
-		
+
 		try {
-//			Optional<User> user = repository.findById(id).map(x -> {
-//				x.setEmail(model.getEmail());
-//				x.setId(id);
-//				x.setPhoneNumber(model.getPhoneNumber());
-//				x.setUserName(model.getUserName());
-//				x.setUserPersonal(
-//						new UserPersonal(model.getUserPersonal().getFirstName(), model.getUserPersonal().getMiddleName(),
-//								model.getUserPersonal().getLastName(), model.getUserPersonal().getGender()));
-//				return x;
-//			});
-			
-			User user = repository.findById(id).get();
-			user.setEmail(model.getEmail());
-			user.setId(id);
-			user.setPhoneNumber(model.getPhoneNumber());
-			user.setUserName(model.getUserName());
-			user.setUserPersonal(new UserPersonal(model.getUserPersonal().getFirstName(), model.getUserPersonal().getMiddleName(),
-								model.getUserPersonal().getLastName(), model.getUserPersonal().getGender()));
-			repository.save(user);
-			return new ResponseModel(true, "User data updated successfully");
+			repository.saveUser(id, model.getUserName(), model.getEmail(), model.getPhoneNumber());
+			CustomUserPersonal personal = model.getUserPersonal();
+			personal.setFullName(
+					personal.getFirstName() + " " + personal.getMiddleName() + " " + personal.getLastName());
+			System.out.println(personal.toString());
+			repository.saveUserPersonal(id, personal.getFirstName(), personal.getMiddleName(), personal.getLastName(),
+					personal.getGender(), personal.getFullName());
+			return new ResponseModel(true, "User updated");
 		} catch (Exception e) {
 			return new ResponseModel(false, e.getLocalizedMessage());
-		}		
+		}
+
 	}
 }

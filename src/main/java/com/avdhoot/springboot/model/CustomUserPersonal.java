@@ -14,5 +14,11 @@ public class CustomUserPersonal {
 	private String fullName;
 	private String gender;
 	
+	@Override
+	public String toString() {
+		return "CustomUserPersonal [firstName=" + firstName + ", middleName=" + middleName + ", lastName=" + lastName
+				+ ", fullName=" + fullName + ", gender=" + gender + "]";
+	}
+	
 	
 }
